@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحه الذكريات - مستر شادي صلاح</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-image: url('your-background.jpg'); /* ضع اسم خلفية جهازك هنا */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #ffffff;
+            overflow: hidden; 
+            background-color: #0a0a12; 
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(10, 10, 18, 0.92), rgba(20, 10, 35, 0.96));
+            backdrop-filter: blur(12px);
+            z-index: -1;
+        }
+
+        /* تصميم التحكم بالصفحات المخفية */
+        section {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 40px 24px 100px 24px;
+            overflow-y: auto; 
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.95);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            z-index: 1;
+        }
+
+        section.active-page {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+            z-index: 10;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* العناوين والنصوص */
+        .main-title {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00f2fe, #4facfe, #0000ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            text-align: center;
+            filter: drop-shadow(0 2px 10px rgba(0,242,254,0.3));
+        }
+
+        @media (max-width: 768px) {
+            .main-title { font-size: 2.2rem; }
+        }
+
+        .sub-text {
+            font-size: 1.1rem;
+            color: #b3b3cc;
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+
+        /* ترتيب الصور تحت بعضها بحجمها الأصلي */
+        .image-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 40px; 
+            width: 100%;
+            max-width: 550px; 
+            margin-bottom: 40px;
+        }
+
+        .card-photo {
+            position: relative;
+            width: 100%;
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .card-photo:hover {
+            transform: translateY(-5px) scale(1.01);
+            border-color: #00f2fe;
+            box-shadow: 0 20px 40px rgba(0, 242, 254, 0.2);
+        }
+
+        .card-photo img {
+            width: 100%;
+            height: auto; 
+            display: block;
+        }
+
+        .card-hover-info {
+            position: absolute;
+            inset: 0;
+            background: rgba(10, 10, 18, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card-photo:hover .card-hover-info {
+            opacity: 1;
+        }
+
+        .card-hover-info span {
+            font-size: 1.1rem;
+            color: #00f2fe;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid #00f2fe;
+        }
+
+        /* عناصر الميديا الفخمة (الفيديو) */
+        .video-container {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 24px;
+            border: 2px solid #00f2fe;
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.3);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        video {
+            width: 100%;
+            display: block;
+        }
+
+        /* أزرار التنقل السفلية */
+        .controls-nav {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(20, 20, 35, 0.6);
+            padding: 12px 25px;
+            border-radius: 40px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: linear-gradient(45deg, #00f2fe, #4facfe);
+            color: #0a0a12;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .nav-btn:hover {
+            box-shadow: 0 0 15px #00f2fe;
+            transform: scale(1.05);
+        }
+
+        .nav-btn:disabled {
+            background: #333;
+            color: #777;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .page-indicator {
+            font-size: 1rem;
+            color: #b3b3cc;
+            font-weight: bold;
+        }
+
+        /* شاشة القفل والترحيب */
+        #lock-screen {
+            position: fixed;
+            inset: 0;
+            background: #09090e;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .lock-container {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 40px 30px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            max-width: 400px;
+            width: 90%;
+            backdrop-filter: blur(20px);
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .lock-container input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1rem;
+            text-align: center;
+            outline: none;
+            margin-top: 25px;
+        }
+
+        .lock-container button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #00f2fe, #4facfe);
+            color: #0a0a12;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        /* نافذة الذكرى المضيئة */
+        .popup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 5, 10, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .popup-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .popup-card {
+            background: linear-gradient(135deg, #141425, #1c1b35);
+            border: 1px solid rgba(0, 242, 254, 0.4);
+            padding: 35px;
+            border-radius: 24px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            text-align: center;
+            transform: scale(0.85);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+        }
+
+        .popup-overlay.active .popup-card {
+            transform: scale(1);
+        }
+
+        .popup-card h3 {
+            font-size: 1.8rem;
+            color: #00f2fe;
+            margin-bottom: 15px;
+        }
+
+        .popup-card p {
+            font-size: 1.1rem;
+            color: #d1d1e9;
+            line-height: 1.8;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            color: rgba(255,255,255,0.4);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay"></div>
+
+    <div id="lock-screen">
+        <div class="lock-container">
+            <h2 style="font-size: 2rem; color: #fff;">أزيك يا مستر شادي </h2>
+            <p style="color: #aaa; margin-top: 10px;">دخل كلمه السر ... تقريبا اكتر حد بتحبه </p>
+            <input type="password" id="pass-field" placeholder="•••">
+            <button onclick="unlockPlatform()">الدخول</button>
+            <p id="error-txt" style="color: #ff4d4d; font-size: 0.9rem; margin-top: 12px; display: none;">مش عارف اسم اكتر حد بتحبه !!!</p>
+        </div>
+    </div>
+    
+    <div class="controls-nav" id="main-nav" style="display: none;">
+        <button class="nav-btn" id="prevBtn" onclick="changePage(-1)">السابق</button>
+        <span class="page-indicator" id="pageInd">1 / 6</span>
+        <button class="nav-btn" id="nextBtn" onclick="changePage(1)">التالي</button>
+    </div>
+    
+    <section id="welcome" class="active-page">
+        <div class="container" style="margin-top: auto; margin-bottom: auto;">
+            <h1 class="main-title">  الويب سايت ده انا مسميه لوحه الذكريات </h1>
+            <p class="sub-text">ببساطه ، هو عباره عن ذكرياتنا من علي مر 3 سنين ... اعتقد ان دي مش فتره صغير عشان منعملش فيها ذكريات ،اي حد فينا اكيدعمل ذكريات </p>
+        </div>
+    </section>
+    
+    <section id="shady">
+        <div class="container">
+            <h3>أ / شادي صلاح</h3>
+            <p class="sub-text">المستر الي تعب معانا كلنا عشان يوصلنا المعلومه.  <br>  او الي جاب اخره مننا واحد واحد <br> او الي زعيقه كان بيوصل لاخر الشارع عشان نسكت <br>
+            و هفضل اتكلم من هنا لبكره و مش هخلص ... انتوا عارفين الباقي بقا .<br> دول كده حبه تغفيلات من اولي ثانوي لحد تالته ثانوي.
+            </p>
+            <div class="image-stack">
+                <div class="card-photo" onclick="openMemory(' الصوره دي اخدتها من الفيس هي و الي تحتها و من ساعتها معايا كانت في اولي ثانوي')">
+                    <img src="a.jpg" alt="صورة 1">
+                    <div class="card-hover-info"><span>عرض الذكرى ✦</span></div>
+                </div>
+
+                <div class="card-photo" onclick="openMemory('...')">
+                    <img src="e.jpg" alt="صورة 2">
+                    <div class="card-hover-info"><span>عرض الذكرى✦</span></div>
+                </div>
+
+                <div class="card-photo" onclick="openMemory('...')">
+                    <img src="u.jpg" alt="صورة 3">
+                    <div class="card-hover-info"><span>عرض الذكرى✦</span></div>
+                </div>
+
+                <div class="card-photo" onclick="openMemory('...')">
+                    <img src="t.jpg" alt="صورة 4">
+                    <div class="card-hover-info"><span>عرض الذكرى✦</span></div>
+                </div>
+
+                <div class="card-photo" onclick="openMemory('...')">
+                    <img src="f.jpg" alt="صورة 5">
+                    <div class="card-hover-info"><span>عرض الذكرى✦</span></div>
+                </div>
+
+                <div class="card-photo" onclick="openMemory('')"><img src="i.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('')"><img src="g.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('')"><img src="o.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('لحد دلوقتي معرفش مين ده بس شاكك انه حضرتك')"><img src="p.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('نعيم ما قبل التدريس')"><img src="q.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('')"><img src="r.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('')"><img src="w.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('')"><img src="y.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('دي بقا مراجعه ليله امتحان 2 ثانوي')"><img src="b.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('')"><img src="n.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory(' صدقني انا لقيت الحاجات دي بالصدفه')"><img src="m.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('دي بقا مراجعه 2 ثانوي ترم اول ')"><img src="c.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('')"><img src="ii.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                 <div class="card-photo" onclick="openMemory('')"><img src="v.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('')"><img src="uu.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('')"><img src="tt.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('')"><img src="yy.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('هنا المأذون كان بيقولك راجع نفسك ')"><img src="h.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('عريسنااااااا')"><img src="aaaaa.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('دي بقا اخر حصه عضويههه تالته ثانوي')"><img src="ww.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('')"><img src="ee.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+               
+            
+           
+            <video  controls>
+                <source src="rr.mp4.mp4" type="video/mp4">
+                متصفحك لا يدعم تشغيل هذا المقطع.
+            </video>
+            </div>
+        </div>
+    </section>
+
+    <section id="rawan">
+        <div class="container">
+            <h1 class="main-title">روان</h1>
+            <p class="sub-text">رواااااان بقاااا ... الي مش حافظه غير بس يابني  <br> 
+            بص في ورقتك يابني 
+            <br>
+            مش عااااايزه صووووووتتتتتتتتتت
+            <br>
+            بجد بجد مش هقدر انسي زعيقك ولا دوشتك الي بتجيبلي صداع كل مره ادخل فيها متأخر 
+            <br>
+            شكرا ليكي بجد انتي كمان علي الي عملتيه عشاننا و تعبك انتي كمان
+            </p>
+            
+            <div class="image-stack">
+                <div class="card-photo" onclick="openMemory('احمدي ربنا اني بدات بدي')">
+                    <img src="gg.jpg">
+                    <div class="card-hover-info"><span>عرض الذكرى ✦</span></div>
+                </div>
+                <div class="card-photo" onclick="openMemory('ملازم اول روان عبد الصمد البشبيشي')">
+                    <img src="d.jpg">
+                    <div class="card-hover-info"><span>عرض الذكرى ✦</span></div>
+                </div>
+                <div class="card-photo" onclick="openMemory('الراجل الي ورا بيضحك ليه !!!')">
+                    <img src="k.jpg">
+                    <div class="card-hover-info"><span>عرض الذكرى ✦</span></div>
+                </div>
+                <div class="card-photo" onclick="openMemory('لقيتهم ونا بعمل الكارت فأخدتهم')">
+                    <img src="ff.jpg">
+                    <div class="card-hover-info"><span>عرض الذكرى ✦</span></div>
+                </div>
+                <div class="card-photo" onclick="openMemory('مكنتيش لسه تعرفي عن الزعيق حاجه')">
+                    <img src="mmm.jpg">
+                    <div class="card-hover-info"><span>عرض الذكرى ✦</span></div>
+                </div>
+                <video controls>
+                    <source src="row.mp4" type="video/mp4">
+                    متصفحك لا يدعم تشغيل هذا المقطع.
+                </video>
+            </div>
+        </div>
+    </section>
+
+    <section id="zamzam">
+        <div class="container">
+            <h1 class="main-title">مجموعة الضوي زمزم</h1>
+            <p class="sub-text">اهههه هنا سأسكت قليلا... مش عارف اقول ايه بجد ، كانت احسن دفعه عدت عليا في حياتي بجد بجد هتوحشوني جدا و اكيد في ناس هقابلهم
+                <br> و في ناس مش هشوفها تاني ، في كلا الحالتين هتوحشوني برضو
+                <br> اشوف وشكم علي خير
+            </p>
+            
+            <div class="image-stack">
+                <div class="card-photo" onclick="openMemory(' تقريبا هي دي الصوره الي جمعتنا الوحيده... بس أن شاء الله هنتصور انهارده')">
+                    <img src="s.jpg">
+                    <div class="card-hover-info"><span>عرض الذكرى ✦</span></div>
+                </div>
+                <div class="card-photo" onclick="openMemory('مصطفي هنا كان بيغرق.')">
+                    <img src="aho.jpg">
+                    <div class="card-hover-info"><span>عرض الذكرى ✦</span></div>
+                    </div>
+                    <video  controls>
+                        <source src="drb.mp4" type="video/mp4">
+                        
+                    </video>
+                
+            </div>
+        </div>
+    </section>
+
+    <section id="ahmed">
+        <div class="container">
+            <h1 class="main-title">أحمد</h1>
+            <p class="sub-text">انا بقا بجد مش لاقي حاجه اقولها هنا ...حرفيا
+<br>  حضر معانا في 3 انوي حصتين بالعدد و اختفي
+<br> مش مهم كده كده تغفيلاته محفوظه
+
+            </p>
+            
+            <div class="image-stack">
+                <div class="card-photo" onclick="openMemory('كانت برضو ليله امتحان الكيميا 2 ؤانوي ')"><img src="qq.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('هنا تالته عادي')"><img src="rr.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('احمد و هو بيتغفل زي و هو مش بيتغفل')"><img src="x.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+                <div class="card-photo" onclick="openMemory('الرادار لقط حاجه اكيد')"><img src="z.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="media-page">
+        <div class="container">
+            <h1 class="main-title">
+            22/7/2022
+            بما انها ذكريات ف هتبقي ذكريات حلوه ف حبيت اختم بدي عشان تبقي اجمل ذكري بالنسبه لحضرتك   
+            </h1>
+           
+         <p class="sub-text">صدقني معرفش المتجوزين بيسمعوا ايه  فحطيت علي ذوقي
+            <br> شغل الثانيه 15
+         </p>
+            
+   <div class="video-container">
+                <video id="customVideo" controls>
+                    <source src="lgs.mp4.mp4" type="video/mp4">
+                    متصفحك لا يدعم تشغيل هذا المقطع.
+                </video>
+            </div>
+
+            <p style="font-size: 1.3rem; color: #00f2fe; text-align: center; max-width: 650px; line-height: 1.8; font-weight: bold;">
+                هذا النص مخصص للكتابة أسفل الأغنية.. يمكنك هنا التعبير عن مشاعرك أو وضع كلمات الأغنية أو رسالة إهداء معبرة تظهر مباشرة بالتزامن مع تشغيل المقطع.
+            </p>
+            <div class="card-photo" onclick="openMemory('')"><img src="shady.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+            <div class="card-photo" onclick="openMemory('')"><img src="tia.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+            <div class="card-photo" onclick="openMemory('')"><img src="shado.jpg"><div class="card-hover-info"><span>عرض الذكرى ✦</span></div></div>
+
+        </div>
+    </section>
+
+
+
+
+
+
+         <section id="footer-sec">
+            <div class="container" style="margin-top: auto; margin-bottom: auto;">
+                <h1 class="main-title">مسك الختام</h1>
+                <p style="font-size: 1.4rem; color: #fff; max-width: 700px; text-align: center; line-height: 2; font-weight: 300;">
+                    <br> مكنتش اعرف ان الوقت بيجري بسرعه اوي كده .. كأني لسه داخل اول حصه كيميا امبارح .. معرفش انا عايز السنه تخلص عشان ارتاح ولا لا 
+                    <br> ولا مش عايزها تخلص عشان اللمه و الضحك و الهزار 
+                    <br> في كلا الحالتين هتفضل الذكري هي الي باقيه .. عشان كده حبيت احط التاتش بتاعي 
+                    <br> دا مش مجرد ويب سايت .. دي رحله مدتها 3 سنين متلخصه في 7 صفحات ...ضحك و هزار و تعب و مذاكره و لعب متلخص في 7 صفحات بجد!
+                  وعموما هي مكانتش مجرد سنه و خلاص ... كانت رحله طويله و متعبه بس عديناها سوا 
+                    <br> سواء رجاله او بنات 
+                    <br> في الاخر احب اقول .. ما حضرتك سبت بصمه في حياه كل واحد فينا .. حبيت انا كمان اسيب بصمتي الي عمرها ما هتتنسي.
+                </p>
+                <div style="margin-top: 50px; font-size: 0.9rem; color: rgba(255,255,255,0.3); letter-spacing: 2px;">
+                    DESIGNED FOR PREMIUM EXPERIENCES 2026
+                </div>
+            </div>
+        </section>
+
+
+
+
+         
+
+
+    <div class="popup-overlay" id="memoryPopup" onclick="closeMemory()">
+        <div class="popup-card" onclick="event.stopPropagation()">
+            <span class="popup-close" onclick="closeMemory()">&times;</span>
+            <h3 id="popTitle">عنوان الذكرى</h3>
+            <p id="popBody">محتوى الذكرى الفخم سيزين هذا المكان...</p>
+        </div>
+    </div>
+
+    <script>
+        let currentPageIndex = 0;
+        const pages = document.querySelectorAll('section');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const pageInd = document.getElementById('pageInd');
+        const customVideo = document.getElementById('customVideo');
+
+        function unlockPlatform() {
+            const val = document.getElementById('pass-field').value;
+            if(val.trim().toLowerCase() === 'tia') {
+                const lock = document.getElementById('lock-screen');
+                lock.style.transform = 'translateY(-100%)';
+                setTimeout(() => {
+                    lock.remove();
+                    document.getElementById('main-nav').style.display = 'flex';
+                    updateNavButtons();
+                }, 600);
+            } else {
+                document.getElementById('error-txt').style.display = 'block';
+            }
+        }
+
+        document.getElementById('pass-field').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') unlockPlatform();
+        });
+
+        function changePage(direction) {
+            pages[currentPageIndex].classList.remove('active-page');
+            pages[currentPageIndex].scrollTop = 0;
+
+            currentPageIndex += direction;
+            pages[currentPageIndex].classList.add('active-page');
+            
+            // التحكم التلقائي في تشغيل وإيقاف الأغنية/الفيديو بناءً على الصفحة النشطة
+            if (pages[currentPageIndex].id === 'media-page') {
+                customVideo.play().catch(error => {
+                    console.log("التشغيل التلقائي يحتاج للتفاعل أولاً مع الصفحة.");
+                });
+            } else {
+                customVideo.pause();
+            }
+
+            updateNavButtons();
+        }
+
+        function updateNavButtons() {
+            prevBtn.disabled = currentPageIndex === 0;
+            nextBtn.disabled = currentPageIndex === pages.length - 1;
+            pageInd.innerText = `${currentPageIndex + 1} / ${pages.length}`;
+        }
+
+        function openMemory(title, text) {
+            document.getElementById('popTitle').innerText = title;
+            document.getElementById('popBody').innerText = text;
+            document.getElementById('memoryPopup').classList.add('active');
+        }
+
+        function closeMemory() {
+            document.getElementById('memoryPopup').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
